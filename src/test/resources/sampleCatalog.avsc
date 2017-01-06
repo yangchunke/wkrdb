@@ -1,0 +1,88 @@
+[
+  [
+    {
+      "name": "Pair",
+      "type": "record",
+      "namespace": "tst.uax",
+      "fields": [
+        {
+          "name": "left",
+          "type": "string"
+        },
+        {
+          "name": "right",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "Val",
+      "type": "record",
+      "namespace": "tst.uax.sample",
+      "fields": [
+        {
+          "name": "value",
+          "type": [
+            "tst.uax.Pair",
+            "null"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "Addr",
+      "type": "record",
+      "namespace": "tst.uax.sample",
+      "fields": [
+        {
+          "name": "addr",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        {
+          "name": "alias",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "PartitionKey",
+      "type": "record",
+      "namespace": "tst.uax.sample",
+      "fields": [
+        {
+          "name": "id",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "RowKey",
+      "type": "record",
+      "namespace": "tst.uax.sample",
+      "fields": [
+        {
+          "name": "id",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "CK",
+      "type": "record",
+      "namespace": "tst.uax.sample",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+]

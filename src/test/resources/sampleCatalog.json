@@ -1,0 +1,108 @@
+{
+  "schemas": [
+    {
+      "tables": [
+        {
+          "columns": [
+            {
+              "type": "LONG",
+              "nullable": false,
+              "udt": "",
+              "name": "id"
+            },
+            {
+              "type": "STRING",
+              "nullable": false,
+              "udt": "",
+              "name": "name"
+            },
+            {
+              "type": "UDT",
+              "nullable": true,
+              "udt": "Pair",
+              "name": "value"
+            },
+            {
+              "type": "STRING",
+              "nullable": true,
+              "udt": "",
+              "name": "addr"
+            },
+            {
+              "type": "STRING",
+              "nullable": false,
+              "udt": "",
+              "name": "alias"
+            }
+          ],
+          "groups": [
+            {
+              "columns": [
+                "value",
+                "name"
+              ],
+              "nullable": false,
+              "name": "Val"
+            },
+            {
+              "columns": [
+                "addr",
+                "alias"
+              ],
+              "nullable": false,
+              "name": "Addr"
+            }
+          ],
+          "partitionKey": {
+            "columns": [
+              "id"
+            ],
+            "nullable": false,
+            "name": "PartitionKey"
+          },
+          "rowKey": {
+            "columns": [
+              "id"
+            ],
+            "nullable": false,
+            "name": "RowKey"
+          },
+          "clusteringKeys": [
+            {
+              "columns": [
+                "name"
+              ],
+              "nullable": false,
+              "name": "CK"
+            }
+          ],
+          "name": "Sample"
+        }
+      ],
+      "udts": [
+        {
+          "attributes": [
+            {
+              "type": "STRING",
+              "nullable": false,
+              "udt": "",
+              "name": "left"
+            },
+            {
+              "type": "TIMESTAMP",
+              "nullable": false,
+              "udt": "",
+              "name": "right"
+            }
+          ],
+          "nullable": false,
+          "name": "Pair"
+        }
+      ],
+      "version": "0.1",
+      "name": "uax"
+    }
+  ],
+  "version": "1.0",
+  "name": "tst"
+}

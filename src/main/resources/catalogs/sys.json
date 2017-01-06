@@ -1,0 +1,63 @@
+{
+  "schemas": [
+    {
+      "tables": [
+        {
+          "columns": [
+            {
+              "type": "STRING",
+              "nullable": false,
+              "udt": "",
+              "name": "name"
+            },
+            {
+              "type": "STRING",
+              "nullable": false,
+              "udt": "",
+              "name": "json"
+            }
+          ],
+          "groups": [
+            {
+              "columns": [
+                "json"
+              ],
+              "nullable": false,
+              "name": "Val"
+            }
+          ],
+          "partitionKey": {
+            "columns": [
+              "name"
+            ],
+            "nullable": false,
+            "name": "PartitionKey"
+          },
+          "rowKey": {
+            "columns": [
+              "name"
+            ],
+            "nullable": false,
+            "name": "RowKey"
+          },
+          "clusteringKeys": [
+            {
+              "columns": [
+                "name"
+              ],
+              "nullable": false,
+              "name": "CK"
+            }
+          ],
+          "name": "catalog"
+        }
+      ],
+      "udts": [
+      ],
+      "version": "0.1",
+      "name": "sys"
+    }
+  ],
+  "version": "1.0",
+  "name": "sys"
+}
