@@ -86,6 +86,25 @@ class DBManager extends Component implements AutoCloseable {
     return new ImmutableTriple<String, String, String>(arr[0], arr[1], arr[2]);
   }
 
+  private void updateCatalog(final String catalogName, final String catalogJson) throws DBException {
+    Store store = sysDB.getStore(c_Schema, c_Table);
+    org.apache.avro.Schema rowKeyAvroSchema = store.getRowKeyAvroSchema();
+    Map<String, org.apache.avro.Schema> groupAvroSchemaMap = store.getGroupAvroSchemaMap();
+
+    GenericRecord rowKey = new GenericData.Record(rowKeyAvroSchema);
+    rowKey.put("name", catalogName);
+
+    GenericRecord val = new GenericData.Record(groupAvroSchemaMap.get(c_Group));
+    val.put("json", catalogJson);
+
+    store.put(PutOptions.c_default, rowKey, new HashMap<String, GenericRecord>() {
+      private static final long serialVersionUID = -7228975586475145637L;
+      {
+        put(c_Group, val);
+      }
+    });
+  }
+
   String createOrUpdateCatalogFromJson(String catalogJson) throws IOException, DBException {
     Catalog newCatalog = Catalog.fromJson(catalogJson);
     Catalog oldCatalog = getCatalog(newCatalog.getName());
@@ -101,25 +120,45 @@ class DBManager extends Component implements AutoCloseable {
     }
 
     if (operate) {
-      Store store = sysDB.getStore(c_Schema, c_Table);
-      org.apache.avro.Schema rowKeyAvroSchema = store.getRowKeyAvroSchema();
-      Map<String, org.apache.avro.Schema> groupAvroSchemaMap = store.getGroupAvroSchemaMap();
-
-      GenericRecord rowKey = new GenericData.Record(rowKeyAvroSchema);
-      rowKey.put("name", newCatalog.getName());
-
-      GenericRecord val = new GenericData.Record(groupAvroSchemaMap.get(c_Group));
-      val.put("json", catalogJson);
-
-      store.put(PutOptions.c_default, rowKey, new HashMap<String, GenericRecord>() {
-        private static final long serialVersionUID = -7228975586475145637L;
-        {
-          put(c_Group, val);
-        }
-      });
+      updateCatalog(newCatalog.getName(), catalogJson);
     }
 
     return newCatalog.toAvro();
+  }
+
+  String createOrUpdateSchemaFromJson(String catalogName, String schemaJson) throws DBException, IOException {
+
+    String ret = null;
+
+    Catalog catalog = getCatalog(catalogName);
+    if (catalog != null) {
+      Schema newSchema = Schema.fromJson(schemaJson);
+      Schema oldSchema = catalog.getSchema(schemaJson);
+
+      boolean operate = false;
+      if (oldSchema == null) {
+        LOG.info(() -> "create schema [" + newSchema.getName() + "].");
+        catalog.addSchema(newSchema);
+        operate = true;
+      } else if (newSchema.getVersion().compareTo(oldSchema.getVersion()) > 0) {
+        LOG.info(() -> "update schema [" + newSchema.getName() + "] from " + oldSchema.getVersion() + " to "
+            + newSchema.getVersion());
+        catalog.updateSchema(newSchema);
+        operate = true;
+      }
+
+      if (operate) {
+        updateCatalog(catalogName, catalog.toString());
+      }
+
+      ret = newSchema.toAvro();
+    }
+
+    return ret;
+  }
+
+  String createOrUpdateTableFromJson(String catalogName, String schemaName, String tableJson) {
+    return null;
   }
 
   List<String> listOfSchemas(String catalogName) throws DBException, IOException {

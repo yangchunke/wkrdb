@@ -6,42 +6,42 @@ import java.util.Collection;
 import avro.shaded.com.google.common.base.Objects;
 
 public class UDT extends RecordElement<Attribute> {
-    private Collection<Attribute> attributes;
+  private Collection<Attribute> attributes;
 
-    public Collection<Attribute> getAttributes() {
-        attributes = (attributes == null) ? new ArrayList<>() : attributes;
-        return attributes;
-    }
+  public Collection<Attribute> getAttributes() {
+    attributes = (attributes == null) ? new ArrayList<>() : attributes;
+    return attributes;
+  }
 
-    public UDT addAttribute(Attribute attribute) throws IllegalArgumentException {
-        return addNamedElementToCollection(this, getAttributes(), attribute);
-    }
+  public UDT addAttribute(Attribute attribute) throws IllegalArgumentException {
+    return addNamedElementToCollection(this, getAttributes(), attribute, NamedElement.OptionOnDuplicate.THROW);
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj instanceof UDT) {
-            UDT that = (UDT) obj;
-            boolean equal = super.equals(that);
-            equal &= equals(this.attributes, that.attributes);
-            return equal;
-        }
-        return false;
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj instanceof UDT) {
+      UDT that = (UDT) obj;
+      boolean equal = super.equals(that);
+      equal &= equals(this.attributes, that.attributes);
+      return equal;
     }
+    return false;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(super.hashCode(), attributes == null ? 0 : attributes);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(super.hashCode(), attributes == null ? 0 : attributes);
+  }
 
-    @Override
-    protected Collection<Attribute> getFields() {
-        return getAttributes();
-    }
+  @Override
+  protected Collection<Attribute> getFields() {
+    return getAttributes();
+  }
 
-    @Override
-    protected NamedElement patchReferences() {
-        return patchReferences(this, attributes);
-    }
+  @Override
+  protected NamedElement patchReferences() {
+    return patchReferences(this, attributes);
+  }
 }
