@@ -1,13 +1,21 @@
 package net.yck.wrkdb.store;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import net.yck.wrkdb.core.DBException;
 import net.yck.wrkdb.meta.Table;
 
 class CacheStore extends Store {
-  protected final Store backend;
+  protected final Store      backend;
+
+  Cache<byte[], byte[]> graphs = Caffeine.newBuilder().maximumSize(10000).expireAfterWrite(5, TimeUnit.MINUTES)
+      .build();
 
   protected CacheStore(Table table, Store backend) {
     super(table);
@@ -27,13 +35,13 @@ class CacheStore extends Store {
   }
 
   @Override
-  public List<byte[]> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException {
+  public List<ByteBuffer> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException {
     return backend.get(options, rowKey, groups);
   }
 
   @Override
-  public void put(PutOptions options, byte[] rowKey, Map<String, byte[]> row) throws DBException {
-    backend.put(options, rowKey, row);    
+  public void put(PutOptions options, byte[] rowKey, Map<String, ByteBuffer> row) throws DBException {
+    backend.put(options, rowKey, row);
   }
 
   @Override

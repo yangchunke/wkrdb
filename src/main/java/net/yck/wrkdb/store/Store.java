@@ -1,6 +1,7 @@
 package net.yck.wrkdb.store;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import net.yck.wrkdb.meta.Group;
 import net.yck.wrkdb.meta.Meta;
 import net.yck.wrkdb.meta.Table;
 import net.yck.wrkdb.util.AvroUtil;
+import net.yck.wrkdb.util.ByteBufferUtil;
 
 public abstract class Store {
 
@@ -113,17 +115,17 @@ public abstract class Store {
     }
   }
 
-  public abstract List<byte[]> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException;
+  public abstract List<ByteBuffer> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException;
 
   public List<GenericRecord> get(GetOptions options, GenericRecord rowKey, List<String> groups) throws DBException {
     List<GenericRecord> ret = new ArrayList<>();
     try {
       byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
-      List<byte[]> raw = get(options, rowKeyBytes, groups);
+      List<ByteBuffer> raw = get(options, rowKeyBytes, groups);
       Preconditions.checkState(raw.size() == groups.size());
       for (int i = 0; i < raw.size(); i++) {
         GenericRecord rec = null;
-        byte[] bytes = raw.get(i);
+        byte[] bytes = ByteBufferUtil.toByteArray(raw.get(i));
         if (bytes != null) {
           org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(groups.get(i));
           if (groupAvroSchema != null) {
@@ -144,17 +146,17 @@ public abstract class Store {
     return ret;
   }
 
-  public abstract void put(PutOptions options, byte[] rowKey, Map<String, byte[]> row) throws DBException;
+  public abstract void put(PutOptions options, byte[] rowKey, Map<String, ByteBuffer> row) throws DBException;
 
   public void put(PutOptions options, GenericRecord rowKey, Map<String, GenericRecord> record) throws DBException {
     try {
       byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
-      Map<String, byte[]> raw = new HashMap<>();
+      Map<String, ByteBuffer> raw = new HashMap<>();
       for (Map.Entry<String, GenericRecord> entry : record.entrySet()) {
         if (entry.getValue() != null) {
           org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(entry.getKey());
           if (groupAvroSchema != null) {
-            raw.put(entry.getKey(), AvroUtil.toBytes(entry.getValue(), groupAvroSchema));
+            raw.put(entry.getKey(), ByteBufferUtil.fromByteArray(AvroUtil.toBytes(entry.getValue(), groupAvroSchema)));
           }
         }
       }
@@ -216,7 +218,7 @@ public abstract class Store {
     @Override
     public Store build() throws DBException {
       Store ret = null;
-      
+
       switch (options.getStoreType()) {
         case MapDB:
           ret = new MapDBStore(table).setOptions(options).setState(DBState.Closed);

@@ -1,6 +1,7 @@
 package net.yck.wrkdb.server;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,17 +32,17 @@ import net.yck.wrkdb.store.Store;
 
 class DBManager extends Component implements AutoCloseable {
 
-  final static Logger         LOG       = LogManager.getLogger(DBManager.class);
+  final static Logger         LOG           = LogManager.getLogger(DBManager.class);
 
-  final static String         c_SvcDir  = Paths.get(System.getProperty("java.io.tmpdir"), "tedb").toString();
+  final static String         c_SvcDir      = Paths.get(System.getProperty("java.io.tmpdir"), "wkrdb").toString();
 
-  private final static String c_Schema  = "sys";
-  private final static String c_Table   = "catalog";
-  private final static String c_Group   = "Val";
+  private final static String c_Sys_Schema  = "sys";
+  private final static String c_Sys_Catalog = "catalog";
+  private final static String c_Sys_Val     = "Val";
 
   DB                          sysDB;
-  Map<String, DB>             appDBs    = new ConcurrentHashMap<String, DB>();
-  Map<String, Store>          appStores = new ConcurrentHashMap<String, Store>();
+  Map<String, DB>             appDBs        = new ConcurrentHashMap<String, DB>();
+  Map<String, Store>          appStores     = new ConcurrentHashMap<String, Store>();
 
   public DBManager(AppBase app) {
     super(app);
@@ -87,20 +88,20 @@ class DBManager extends Component implements AutoCloseable {
   }
 
   private void updateCatalog(final String catalogName, final String catalogJson) throws DBException {
-    Store store = sysDB.getStore(c_Schema, c_Table);
+    Store store = sysDB.getStore(c_Sys_Schema, c_Sys_Catalog);
     org.apache.avro.Schema rowKeyAvroSchema = store.getRowKeyAvroSchema();
     Map<String, org.apache.avro.Schema> groupAvroSchemaMap = store.getGroupAvroSchemaMap();
 
     GenericRecord rowKey = new GenericData.Record(rowKeyAvroSchema);
     rowKey.put("name", catalogName);
 
-    GenericRecord val = new GenericData.Record(groupAvroSchemaMap.get(c_Group));
+    GenericRecord val = new GenericData.Record(groupAvroSchemaMap.get(c_Sys_Val));
     val.put("json", catalogJson);
 
     store.put(PutOptions.c_default, rowKey, new HashMap<String, GenericRecord>() {
       private static final long serialVersionUID = -7228975586475145637L;
       {
-        put(c_Group, val);
+        put(c_Sys_Val, val);
       }
     });
   }
@@ -182,28 +183,25 @@ class DBManager extends Component implements AutoCloseable {
   }
 
   DBSchema getDBSchema(DBContext context) throws DBException {
-    Store store = appStores.computeIfAbsent(context.identifier, identifier -> {
-      Store _store = null;
-      try {
-        ImmutableTriple<String, String, String> triple = parseIdentifier(identifier);
-        DB db = getDB(triple.left);
-        _store = db.getStore(triple.middle, triple.right);
-      } catch (Exception e) {
-        LOG.error(e.getMessage());
-      }
-      return _store;
-    });
-
-    if (store == null) {
-      throw new DBException("unable to obtain store for " + context);
-    }
-
+    Store store = getStore(context);
     Map<String, String> groupSchemas = new HashMap<>(store.getGroupAvroSchemaMap().size());
     for (Map.Entry<String, org.apache.avro.Schema> entry : store.getGroupAvroSchemaMap().entrySet()) {
       groupSchemas.put(entry.getKey(), entry.getValue().toString());
     }
     return new DBSchema(store.getPartitionKeyAvroSchema().toString(), store.getRowKeyAvroSchema().toString(),
         groupSchemas);
+  }
+
+  List<ByteBuffer> get(DBContext context, byte[] rowKey, List<String> groups) throws DBException {
+    return getStore(context).get(GetOptions.from(context.properties), rowKey, groups);
+  }
+
+  void put(DBContext context, byte[] rowKey, Map<String, ByteBuffer> mappings) throws DBException {
+    getStore(context).put(PutOptions.from(context.properties), rowKey, mappings);
+  }
+
+  void remove(DBContext context, byte[] rowKey, List<String> groups) throws DBException {
+    getStore(context).remove(PutOptions.from(context.properties), rowKey, groups);
   }
 
   private DB getDB(String catalogName) {
@@ -224,14 +222,35 @@ class DBManager extends Component implements AutoCloseable {
   }
 
   private Catalog getCatalog(String catalogName) throws DBException, IOException {
-    Store store = sysDB.getStore(c_Schema, c_Table);
+    Store store = sysDB.getStore(c_Sys_Schema, c_Sys_Catalog);
 
     org.apache.avro.Schema rowKeyAvroSchema = store.getRowKeyAvroSchema();
     GenericRecord rowKey = new GenericData.Record(rowKeyAvroSchema);
     rowKey.put("name", catalogName);
 
-    List<GenericRecord> vals = store.get(GetOptions.c_default, rowKey, Arrays.asList(c_Group));
+    List<GenericRecord> vals = store.get(GetOptions.c_default, rowKey, Arrays.asList(c_Sys_Val));
     GenericRecord val = vals.get(0);
     return val == null ? null : Catalog.fromJson(val.get("json").toString());
   }
+
+  private Store getStore(DBContext context) throws DBException {
+
+    Store ret = appStores.computeIfAbsent(context.identifier, identifier -> {
+      Store store = null;
+      try {
+        ImmutableTriple<String, String, String> triple = parseIdentifier(identifier);
+        store = getDB(triple.left).getStore(triple.middle, triple.right);
+      } catch (Exception e) {
+        LOG.error(e.getMessage());
+      }
+      return store;
+    });
+
+    if (ret == null) {
+      throw new DBException("unable to obtain store for " + context);
+    }
+
+    return ret;
+  }
+
 }

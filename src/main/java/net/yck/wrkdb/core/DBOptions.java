@@ -1,5 +1,6 @@
 package net.yck.wrkdb.core;
 
+import java.util.Map;
 import java.util.Properties;
 
 import net.yck.wrkdb.store.Store;
@@ -28,36 +29,46 @@ public class DBOptions extends Properties {
     return this.getProperty(Prop_DB_rootPath);
   }
 
-  public DBOptions setRootPath(String rootPath) {
+  @SuppressWarnings("unchecked")
+  public <T extends DBOptions> T setRootPath(String rootPath) {
     this.setProperty(Prop_DB_rootPath, rootPath);
-    return this;
+    return (T) this;
   }
 
   public Store.Type getStoreType() {
     return Store.Type.valueOf(this.getProperty(Prop_Store_Type));
   }
 
-  public DBOptions setStoreType(Store.Type storeType) {
+  @SuppressWarnings("unchecked")
+  public <T extends DBOptions> T setStoreType(Store.Type storeType) {
     this.setProperty(Prop_Store_Type, storeType.name());
-    return this;
+    return (T) this;
   }
 
   public int getNumOfShards() {
     return Integer.parseInt(this.getProperty(Prop_Store_NumOfShards, Integer.toString(def_NumOfShards)));
   }
 
-  public DBOptions setNumOfShards(int numOfShards) {
+  @SuppressWarnings("unchecked")
+  public <T extends DBOptions> T setNumOfShards(int numOfShards) {
     this.setProperty(Prop_Store_NumOfShards, Integer.toString(numOfShards));
-    return this;
+    return (T) this;
   }
 
   public boolean getUseCache() {
     return Boolean.parseBoolean(this.getProperty(Prop_Store_UseCache, Boolean.toString(def_useCache)));
   }
 
-  public DBOptions setUseCache(boolean useCache) {
+  @SuppressWarnings("unchecked")
+  public <T extends DBOptions> T setUseCache(boolean useCache) {
     this.setProperty(Prop_Store_UseCache, Boolean.toString(useCache));
-    return this;
+    return (T) this;
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <T extends DBOptions> T populate(Map<String, String> prop) {
+    prop.forEach((key, val) -> put(key, val));
+    return (T) this;
   }
 
 }
