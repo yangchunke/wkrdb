@@ -215,13 +215,21 @@ public abstract class Store {
 
     @Override
     public Store build() throws DBException {
+      Store ret = null;
+      
       switch (options.getStoreType()) {
         case MapDB:
-          return new CacheStore(table, new MapDBStore(table).setOptions(options)//
-              .setState(DBState.Closed)).setOptions(options).setState(DBState.Closed);
+          ret = new MapDBStore(table).setOptions(options).setState(DBState.Closed);
+          break;
         default:
           throw new DBException("unsupported store type - " + options.getStoreType());
       }
+
+      if (ret != null && options.getUseCache()) {
+        ret = new CacheStore(table, ret).setOptions(options).setState(DBState.Closed);
+      }
+
+      return ret;
     }
 
     public Builder setTable(Table table) {
