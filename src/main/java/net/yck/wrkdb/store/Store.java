@@ -24,211 +24,209 @@ import net.yck.wrkdb.util.AvroUtil;
 
 public abstract class Store {
 
-    final protected static Logger LOG = LoggerFactory.getLogger(Store.class);
+  final protected static Logger LOG = LoggerFactory.getLogger(Store.class);
 
-    public static enum Type {
-        MapDB
+  public static enum Type {
+    MapDB
+  }
+
+  protected final Table                       table;
+  private DBOptions                           options;
+  private DBState                             state;
+
+  private org.apache.avro.Schema              schemaAvroSchema;
+  private org.apache.avro.Schema              partitionKeyAvroSchema;
+  private org.apache.avro.Schema              rowkeyAvroSchema;
+  private Map<String, org.apache.avro.Schema> groupAvroSchemaMap;
+
+  protected Store(Table table) {
+    this.table = table;
+  }
+
+  private Store initialize() {
+    schemaAvroSchema = new org.apache.avro.Schema.Parser().parse(table.getSchema().toAvro());
+
+    partitionKeyAvroSchema = schemaAvroSchema.getTypes()
+        .get(schemaAvroSchema.getIndexNamed(table.getPartitionKey().getNamespace() + "." + Meta.kw_PartitionKey));
+    if (table.getRowKey() != null) {
+      rowkeyAvroSchema = schemaAvroSchema.getTypes()
+          .get(schemaAvroSchema.getIndexNamed(table.getRowKey().getNamespace() + "." + Meta.kw_RowKey));
+    } else {
+      rowkeyAvroSchema = partitionKeyAvroSchema;
     }
 
-    protected final Table table;
-    private DBOptions options;
-    private DBState state;
-
-    private org.apache.avro.Schema schemaAvroSchema;
-    private org.apache.avro.Schema partitionKeyAvroSchema;
-    private org.apache.avro.Schema rowkeyAvroSchema;
-    private Map<String, org.apache.avro.Schema> groupAvroSchemaMap;
-
-    protected Store(Table table) {
-        this.table = table;
+    groupAvroSchemaMap = new HashMap<>();
+    for (Group group : table.getGroups()) {
+      Integer groupIdx = schemaAvroSchema.getIndexNamed(group.getNamespace() + "." + group.getName());
+      groupAvroSchemaMap.put(group.getName(), schemaAvroSchema.getTypes().get(groupIdx));
     }
 
-    private Store initialize() {
-        schemaAvroSchema = new org.apache.avro.Schema.Parser().parse(table.getSchema().toAvro());
+    return this;
+  }
 
-        partitionKeyAvroSchema = schemaAvroSchema.getTypes().get(schemaAvroSchema.getIndexNamed(table.getPartitionKey().getNamespace() + "." + Meta.kw_PartitionKey));
-        if (table.getRowKey() != null) {
-            rowkeyAvroSchema = schemaAvroSchema.getTypes().get(schemaAvroSchema.getIndexNamed(table.getRowKey().getNamespace() + "." + Meta.kw_RowKey));
-        }
-        else {
-            rowkeyAvroSchema = partitionKeyAvroSchema;
-        }
+  public org.apache.avro.Schema getSchemaAvroSchema() {
+    return schemaAvroSchema;
+  }
 
-        groupAvroSchemaMap = new HashMap<>();
-        for (Group group : table.getGroups()) {
-            Integer groupIdx = schemaAvroSchema.getIndexNamed(group.getNamespace() + "." + group.getName());
-            groupAvroSchemaMap.put(group.getName(), schemaAvroSchema.getTypes().get(groupIdx));
-        }
+  public org.apache.avro.Schema getPartitionKeyAvroSchema() {
+    return partitionKeyAvroSchema;
+  }
 
-        return this;
-    }
+  public org.apache.avro.Schema getRowKeyAvroSchema() {
+    return rowkeyAvroSchema;
+  }
 
-    public org.apache.avro.Schema getSchemaAvroSchema() {
-        return schemaAvroSchema;
-    }
+  public Map<String, org.apache.avro.Schema> getGroupAvroSchemaMap() {
+    return groupAvroSchemaMap;
+  }
 
-    public org.apache.avro.Schema getPartitionKeyAvroSchema() {
-        return partitionKeyAvroSchema;
-    }
+  protected abstract Store doOpen() throws DBException;
 
-    public org.apache.avro.Schema getRowKeyAvroSchema() {
-        return rowkeyAvroSchema;
-    }
-
-    public Map<String, org.apache.avro.Schema> getGroupAvroSchemaMap() {
-        return groupAvroSchemaMap;
-    }
-
-    protected abstract Store doOpen() throws DBException;
-
-    public Store open() throws DBException {
+  public Store open() throws DBException {
+    if (DBState.Closed == getState()) {
+      synchronized (this) {
         if (DBState.Closed == getState()) {
-            synchronized (this) {
-                if (DBState.Closed == getState()) {
-                    initialize().doOpen().setState(DBState.Open);
-                    LOG.info(identifier() + " opened.");
-                }
-            }
+          initialize().doOpen().setState(DBState.Open);
+          LOG.info(identifier() + " opened.");
         }
+      }
+    }
+    if (DBState.Open == getState()) {
+      return this;
+    }
+    throw new DBException(identifier() + " is in bad state " + state);
+  }
+
+  protected abstract Store doClose() throws DBException;
+
+  public void close() throws DBException {
+    if (DBState.Open == getState()) {
+      synchronized (this) {
         if (DBState.Open == getState()) {
-            return this;
+          doClose().setState(DBState.Closed);
+          LOG.info(identifier() + " closed.");
         }
-        throw new DBException(identifier() + " is in bad state " + state);
+      }
     }
+    if (DBState.Closed != getState()) {
+      throw new DBException(identifier() + " is in bad state " + state);
+    }
+  }
 
-    protected abstract Store doClose() throws DBException;
+  public abstract List<byte[]> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException;
 
-    public void close() throws DBException {
-        if (DBState.Open == getState()) {
-            synchronized (this) {
-                if (DBState.Open == getState()) {
-                    doClose().setState(DBState.Closed);
-                    LOG.info(identifier() + " closed.");
-                }
+  public List<GenericRecord> get(GetOptions options, GenericRecord rowKey, List<String> groups) throws DBException {
+    List<GenericRecord> ret = new ArrayList<>();
+    try {
+      byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
+      List<byte[]> raw = get(options, rowKeyBytes, groups);
+      Preconditions.checkState(raw.size() == groups.size());
+      for (int i = 0; i < raw.size(); i++) {
+        GenericRecord rec = null;
+        byte[] bytes = raw.get(i);
+        if (bytes != null) {
+          org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(groups.get(i));
+          if (groupAvroSchema != null) {
+            try {
+              rec = AvroUtil.fromBytes(bytes, groupAvroSchema);
+            } catch (IOException e) {
+              LOG.warn(e.getMessage());
             }
+          }
         }
-        if (DBState.Closed != getState()) {
-            throw new DBException(identifier() + " is in bad state " + state);
+        ret.add(rec);
+      }
+    } catch (IOException e) {
+      throw new DBException(e);
+    }
+
+    Preconditions.checkState(ret.size() == groups.size());
+    return ret;
+  }
+
+  public abstract void put(PutOptions options, byte[] rowKey, Map<String, byte[]> row) throws DBException;
+
+  public void put(PutOptions options, GenericRecord rowKey, Map<String, GenericRecord> record) throws DBException {
+    try {
+      byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
+      Map<String, byte[]> raw = new HashMap<>();
+      for (Map.Entry<String, GenericRecord> entry : record.entrySet()) {
+        if (entry.getValue() != null) {
+          org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(entry.getKey());
+          if (groupAvroSchema != null) {
+            raw.put(entry.getKey(), AvroUtil.toBytes(entry.getValue(), groupAvroSchema));
+          }
         }
+      }
+      put(options, rowKeyBytes, raw);
+    } catch (IOException e) {
+      throw new DBException(e);
+    }
+  }
+
+  public abstract void remove(PutOptions options, byte[] rowKey, List<String> groups) throws DBException;
+
+  public void remove(PutOptions options, GenericRecord rowKey, List<String> groups) throws DBException {
+    try {
+      byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
+      remove(options, rowKeyBytes, groups);
+    } catch (IOException e) {
+      throw new DBException(e);
+    }
+  }
+
+  public final String identifier() {
+    return identifier(':');
+  }
+
+  public final String identifier(char separator) {
+    return Joiner.on(separator).join(table.getSchema().getCatalog().getName(), table.getSchema().getName(),
+        table.getName());
+  }
+
+  DBOptions getOptions() {
+    return this.options;
+  }
+
+  Store setOptions(DBOptions options) {
+    this.options = options;
+    return this;
+  }
+
+  public DBState getState() {
+    return this.state;
+
+  }
+
+  Store setState(DBState state) {
+    this.state = state;
+    return this;
+  }
+
+  // ------------------------------------------------------------------------------------------
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder extends DBBuilder<Store> {
+
+    private Table table;
+
+    @Override
+    public Store build() throws DBException {
+      switch (options.getStoreType()) {
+        case MapDB:
+          return new CacheStore(table, new MapDBStore(table).setOptions(options)//
+              .setState(DBState.Closed)).setOptions(options).setState(DBState.Closed);
+        default:
+          throw new DBException("unsupported store type - " + options.getStoreType());
+      }
     }
 
-    public abstract List<byte[]> get(GetOptions options, byte[] rowKey, List<String> groups) throws DBException;
-
-    public List<GenericRecord> get(GetOptions options, GenericRecord rowKey, List<String> groups) throws DBException {
-        List<GenericRecord> ret = new ArrayList<>();
-        try {
-            byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
-            List<byte[]> raw = get(options, rowKeyBytes, groups);
-            Preconditions.checkState(raw.size() == groups.size());
-            for (int i = 0; i < raw.size(); i++) {
-                GenericRecord rec = null;
-                byte[] bytes = raw.get(i);
-                if (bytes != null) {
-                    org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(groups.get(i));
-                    if (groupAvroSchema != null) {
-                        try {
-                            rec = AvroUtil.fromBytes(bytes, groupAvroSchema);
-                        }
-                        catch (IOException e) {
-                            LOG.warn(e.getMessage());
-                        }
-                    }
-                }
-                ret.add(rec);
-            }
-        }
-        catch (IOException e) {
-            throw new DBException(e);
-        }
-
-        Preconditions.checkState(ret.size() == groups.size());
-        return ret;
+    public Builder setTable(Table table) {
+      this.table = table;
+      return this;
     }
-
-    public abstract void put(PutOptions options, byte[] rowKey, Map<String, byte[]> row) throws DBException;
-
-    public void put(PutOptions options, GenericRecord rowKey, Map<String, GenericRecord> record) throws DBException {
-        try {
-            byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
-            Map<String, byte[]> raw = new HashMap<>();
-            for (Map.Entry<String, GenericRecord> entry : record.entrySet()) {
-                if (entry.getValue() != null) {
-                    org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(entry.getKey());
-                    if (groupAvroSchema != null) {
-                        raw.put(entry.getKey(), AvroUtil.toBytes(entry.getValue(), groupAvroSchema));
-                    }
-                }
-            }
-            put(options, rowKeyBytes, raw);
-        }
-        catch (IOException e) {
-            throw new DBException(e);
-        }
-    }
-
-    public abstract void remove(PutOptions options, byte[] rowKey, List<String> groups) throws DBException;
-
-    public void remove(PutOptions options, GenericRecord rowKey, List<String> groups) throws DBException {
-        try {
-            byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
-            remove(options, rowKeyBytes, groups);
-        }
-        catch (IOException e) {
-            throw new DBException(e);
-        }
-    }
-
-    public final String identifier() {
-        return identifier(':');
-    }
-
-    public final String identifier(char separator) {
-        return Joiner.on(separator).join(table.getSchema().getCatalog().getName(), table.getSchema().getName(), table.getName());
-    }
-
-    DBOptions getOptions() {
-        return this.options;
-    }
-
-    Store setOptions(DBOptions options) {
-        this.options = options;
-        return this;
-    }
-
-    public DBState getState() {
-        return this.state;
-
-    }
-
-    Store setState(DBState state) {
-        this.state = state;
-        return this;
-    }
-
-    // ------------------------------------------------------------------------------------------
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder extends DBBuilder<Store> {
-
-        private Table table;
-
-        @Override
-        public Store build() throws DBException {
-            switch (options.getStoreType()) {
-            case MapDB:
-                return new MapDBStore(table).setOptions(options)//
-                                .setState(DBState.Closed);
-            default:
-                throw new DBException("unsupported store type - " + options.getStoreType());
-            }
-        }
-
-        public Builder setTable(Table table) {
-            this.table = table;
-            return this;
-        }
-    }
+  }
 }
