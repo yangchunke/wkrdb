@@ -12,13 +12,12 @@ import net.yck.wrkdb.server.App;
 import net.yck.wrkdb.server.DBManager;
 
 public abstract class AppSelfService implements ITestSuite {
-    private final static Object lock = new Object();
     static App app = null;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
         if (app == null) {
-            synchronized (lock) {
+            synchronized (AppSelfService.class) {
                 if (app == null) {
 
                     new File(DBManager.c_SvcDir).mkdirs();

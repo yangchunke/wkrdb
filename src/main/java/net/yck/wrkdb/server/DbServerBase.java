@@ -9,56 +9,53 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Preconditions;
 
-import net.yck.wrkdb.shared.AppBase;
 import net.yck.wrkdb.util.ResourceUtil;
 
-public abstract class DbServerBase extends AppBase.Component implements Runnable {
+public abstract class DbServerBase extends ServerComponent implements Runnable {
 
-    private final static Logger LOG = App.LOG;
+  private final static Logger LOG = App.LOG;
 
-    final DBManager dbManager;
+  final DBManager             dbManager;
 
-    private int port;
-    private String version;
+  private int                 port;
+  private String              version;
 
-    DbServerBase(App app) {
-        super(app);
-        Preconditions.checkArgument(app.dbManager != null);
-        this.dbManager = app.dbManager;
-    }
+  DbServerBase(App app) {
+    super(app);
+    Preconditions.checkArgument(app.dbManager != null);
+    this.dbManager = app.dbManager;
+  }
 
-    @Override
-    public AppBase.Component initialize() throws Exception {
-        port = app.config.getProperty(getPortProperty().left, getPortProperty().right);
-        return this;
-    }
+  @Override
+  protected void doInitialize() throws Exception {
+    port = app.config.getProperty(getPortProperty().left, getPortProperty().right);
+  }
 
-    /**
-     * @return ImmutablePair<PropertyName, DefaultValue)
-     */
-    protected abstract ImmutablePair<String, Integer> getPortProperty();
+  /**
+   * @return ImmutablePair<PropertyName, DefaultValue)
+   */
+  protected abstract ImmutablePair<String, Integer> getPortProperty();
 
-    int getPort() {
-        return port;
-    }
+  int getPort() {
+    return port;
+  }
 
-    String getVersion() {
+  String getVersion() {
+    if (StringUtils.isEmpty(version)) {
+      synchronized (this) {
         if (StringUtils.isEmpty(version)) {
-            synchronized (this) {
-                if (StringUtils.isEmpty(version)) {
-                    try {
-                        Properties p = new Properties();
-                        p.load(ResourceUtil.getInputStream(this.getClass(), "/version.txt"));
-                        version = p.getProperty("version") + ".v" + p.getProperty("build.date");
-                    }
-                    catch (IOException e) {
-                        version = "N/A";
-                        LOG.error(() -> "failed to load version", e);
-                    }
-                }
-            }
+          try {
+            Properties p = new Properties();
+            p.load(ResourceUtil.getInputStream(this.getClass(), "/version.txt"));
+            version = p.getProperty("version") + ".v" + p.getProperty("build.date");
+          } catch (IOException e) {
+            version = "N/A";
+            LOG.error(() -> "failed to load version", e);
+          }
         }
-        return version;
+      }
     }
+    return version;
+  }
 
 }

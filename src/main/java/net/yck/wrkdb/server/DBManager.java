@@ -24,13 +24,11 @@ import net.yck.wrkdb.meta.Catalog;
 import net.yck.wrkdb.meta.Schema;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
-import net.yck.wrkdb.shared.AppBase;
-import net.yck.wrkdb.shared.AppBase.Component;
 import net.yck.wrkdb.store.GetOptions;
 import net.yck.wrkdb.store.PutOptions;
 import net.yck.wrkdb.store.Store;
 
-class DBManager extends Component implements AutoCloseable {
+class DBManager extends ServerComponent implements AutoCloseable {
 
   final static Logger         LOG           = LogManager.getLogger(DBManager.class);
 
@@ -44,12 +42,12 @@ class DBManager extends Component implements AutoCloseable {
   Map<String, DB>             appDBs        = new ConcurrentHashMap<String, DB>();
   Map<String, Store>          appStores     = new ConcurrentHashMap<String, Store>();
 
-  public DBManager(AppBase app) {
+  DBManager(App app) {
     super(app);
   }
 
   @Override
-  public Component initialize() throws Exception {
+  protected void doInitialize() throws Exception {
 
     Catalog catalog = Catalog.fromResource(DB.class, "/catalogs/sys.json");
 
@@ -62,8 +60,6 @@ class DBManager extends Component implements AutoCloseable {
         .setCatalog(catalog)//
         .setOptions(options)//
         .build();
-
-    return this;
   }
 
   @Override
