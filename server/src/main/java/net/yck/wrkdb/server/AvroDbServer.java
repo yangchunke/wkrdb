@@ -13,44 +13,44 @@ import net.yck.wrkdb.service.avro.DbService;
 
 public class AvroDbServer extends DbServerBase {
 
-    private final static Logger logger = LogManager.getLogger(AvroDbServer.class);
+  private final static Logger                         logger        = LogManager.getLogger(AvroDbServer.class);
 
-    private final static ImmutablePair<String, Integer> PROP_DEF_PAIR = new ImmutablePair<String, Integer>(AVRO_DBSERVER_PORT, 10720);
+  private final static ImmutablePair<String, Integer> PROP_DEF_PAIR =
+      new ImmutablePair<String, Integer>(AVRO_DBSERVER_PORT, 10720);
 
-    private DbService svc;
+  private DbService                                   svc;
 
-    AvroDbServer(App app) {
-        super(app);
+  AvroDbServer(App app) {
+    super(app);
+  }
+
+  @Override
+  public void run() {
+
+    Server server = null;
+    try {
+      server = new NettyServer(new SpecificResponder(DbService.class, getDbService()),
+          new InetSocketAddress("localhost", getPort()));
+      logger.info(() -> "Avro DbService started successfully on port " + getPort());
+      server.join();
+    } catch (Exception e) {
+      logger.error(() -> "Failed to start Avro DbService", e);
+    } finally {
+      if (server != null) {
+        server.close();
+      }
     }
+  }
 
-    @Override
-    public void run() {
+  @Override
+  protected ImmutablePair<String, Integer> getPortProperty() {
+    return PROP_DEF_PAIR;
+  }
 
-        Server server = null;
-        try {
-            server = new NettyServer(new SpecificResponder(DbService.class, getDbService()), new InetSocketAddress("localhost", getPort()));
-            logger.info(() -> "Avro DbService started successfully on port " + getPort());
-            server.join();
-        }
-        catch (Exception e) {
-            logger.error(() -> "Failed to start Avro DbService", e);
-        }
-        finally {
-            if (server != null) {
-                server.close();
-            }
-        }
+  DbService getDbService() {
+    if (svc == null) {
+      svc = new AvroDbService(this);
     }
-
-    @Override
-    protected ImmutablePair<String, Integer> getPortProperty() {
-        return PROP_DEF_PAIR;
-    }
-
-    DbService getDbService() {
-        if (svc == null) {
-            svc = new AvroDbService(this);
-        }
-        return svc;
-    }
+    return svc;
+  }
 }

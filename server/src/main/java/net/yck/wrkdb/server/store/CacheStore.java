@@ -12,10 +12,9 @@ import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.server.meta.Table;
 
 class CacheStore extends Store {
-  protected final Store      backend;
+  protected final Store backend;
 
-  Cache<byte[], byte[]> graphs = Caffeine.newBuilder().maximumSize(10000).expireAfterWrite(5, TimeUnit.MINUTES)
-      .build();
+  Cache<byte[], byte[]> graphs = Caffeine.newBuilder().maximumSize(10000).expireAfterWrite(5, TimeUnit.MINUTES).build();
 
   protected CacheStore(Table table, Store backend) {
     super(table);
