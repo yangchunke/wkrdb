@@ -1,4 +1,0 @@
-@namespace("net.yck.wrkdb.service.avro")
-protocol DbService{
-  string ping();
-}
