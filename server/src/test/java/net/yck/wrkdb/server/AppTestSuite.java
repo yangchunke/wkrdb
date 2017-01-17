@@ -10,7 +10,7 @@ public class AppTestSuite extends AppSelfService {
     @Test
     public void ping() {
         try {
-            String v = getThriftIface().ping();
+            String v = getThriftDbService().ping();
             LOG.info(v);
             Assert.assertFalse(v.equals("N/A"));
         }

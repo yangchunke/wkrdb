@@ -17,7 +17,7 @@ public class DBSvcTestSuite extends AppSelfService {
   @Before
   public void before() {
     try {
-      getThriftIface().createOrUpdateCatalogFromJson(CatalogTestSuite.sampleCatalog().toString());
+      getThriftDbService().createOrUpdateCatalogFromJson(CatalogTestSuite.sampleCatalog().toString());
     } catch (Exception e) {
       Assert.fail(e.getMessage());
     }
@@ -26,7 +26,7 @@ public class DBSvcTestSuite extends AppSelfService {
   @Test
   public void listOfSchemas() {
     try {
-      List<String> schemas = getThriftIface().listOfSchemas(CatalogTestSuite.c_SampleCatalogName);
+      List<String> schemas = getThriftDbService().listOfSchemas(CatalogTestSuite.c_SampleCatalogName);
       LOG.info(schemas);
     } catch (Exception e) {
       Assert.fail(e.getMessage());
@@ -37,7 +37,7 @@ public class DBSvcTestSuite extends AppSelfService {
   public void listOfTables() {
     try {
       List<String> tables =
-          getThriftIface().listOfTables(CatalogTestSuite.c_SampleCatalogName, SchemaTestSuite.c_SampleSchemaName);
+          getThriftDbService().listOfTables(CatalogTestSuite.c_SampleCatalogName, SchemaTestSuite.c_SampleSchemaName);
       LOG.info(tables);
     } catch (Exception e) {
       Assert.fail(e.getMessage());
@@ -47,7 +47,7 @@ public class DBSvcTestSuite extends AppSelfService {
   @Test
   public void createDBContext() {
     try {
-      DBContext ctx = getThriftIface().createDBContext(CatalogTestSuite.c_SampleCatalogName,
+      DBContext ctx = getThriftDbService().createDBContext(CatalogTestSuite.c_SampleCatalogName,
           SchemaTestSuite.c_SampleSchemaName, TableTestSuite.c_SampleTableName, null);
       LOG.info(ctx);
     } catch (Exception e) {
@@ -58,9 +58,9 @@ public class DBSvcTestSuite extends AppSelfService {
   @Test
   public void getDBSchema() {
     try {
-      DBContext ctx = getThriftIface().createDBContext(CatalogTestSuite.c_SampleCatalogName,
+      DBContext ctx = getThriftDbService().createDBContext(CatalogTestSuite.c_SampleCatalogName,
           SchemaTestSuite.c_SampleSchemaName, TableTestSuite.c_SampleTableName, null);
-      DBSchema schema = getThriftIface().getDBSchema(ctx);
+      DBSchema schema = getThriftDbService().getDBSchema(ctx);
       LOG.info(schema);
     } catch (Exception e) {
       Assert.fail(e.getMessage());

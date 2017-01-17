@@ -36,17 +36,11 @@ public abstract class AppSelfService implements ITestSuite {
     }
   }
 
-  protected static net.yck.wrkdb.service.thrift.DbService.Iface getThriftIface() {
+  protected static net.yck.wrkdb.service.thrift.DbService.Iface getThriftDbService() {
     return app.getThriftDbService();
   }
 
   protected static net.yck.wrkdb.service.avro.DbService getAvroDbService() {
     return app.getAvroDbService();
   }
-
-  // protected static ThriftDbClient getThriftDbClient() throws
-  // SocketException, TTransportException {
-  // return ThriftDbClient.getClient("localhost",
-  // app.thriftDbServer.getPort());
-  // }
 }
