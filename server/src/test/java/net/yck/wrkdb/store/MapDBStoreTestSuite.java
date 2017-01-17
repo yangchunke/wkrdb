@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import net.yck.wkrdb.DB;
 import net.yck.wrkdb.ITestSuite;
-import net.yck.wrkdb.core.DBException;
+import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.core.DBOptions;
 import net.yck.wrkdb.meta.CatalogTestSuite;
 import net.yck.wrkdb.meta.SchemaTestSuite;

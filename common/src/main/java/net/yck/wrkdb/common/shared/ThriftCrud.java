@@ -1,4 +1,4 @@
-package net.yck.wrkdb.shared;
+package net.yck.wrkdb.common.shared;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,13 +14,13 @@ import org.apache.thrift.TException;
 
 import com.google.common.base.Preconditions;
 
-import net.yck.wrkdb.core.DBException;
+import net.yck.wrkdb.common.DBException;
+import net.yck.wrkdb.common.util.AvroUtil;
+import net.yck.wrkdb.common.util.ByteBufferUtil;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
 import net.yck.wrkdb.service.thrift.DbService;
 import net.yck.wrkdb.service.thrift.Key;
-import net.yck.wrkdb.util.AvroUtil;
-import net.yck.wrkdb.util.ByteBufferUtil;
 
 public class ThriftCrud {
 

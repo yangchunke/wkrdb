@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.core.DBBuilder;
-import net.yck.wrkdb.core.DBException;
 import net.yck.wrkdb.core.DBOptions;
 import net.yck.wrkdb.meta.Catalog;
 import net.yck.wrkdb.meta.Schema;

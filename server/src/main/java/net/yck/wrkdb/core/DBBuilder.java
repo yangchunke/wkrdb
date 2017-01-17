@@ -1,5 +1,6 @@
 package net.yck.wrkdb.core;
 
+import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.meta.Catalog;
 
 public abstract class DBBuilder<T> {

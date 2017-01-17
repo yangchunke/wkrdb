@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
-import net.yck.wrkdb.core.DBException;
+import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.meta.Table;
 
 class CacheStore extends Store {

@@ -1,4 +1,4 @@
-package net.yck.wrkdb.core;
+package net.yck.wrkdb.common;
 
 public class DBException extends RuntimeException {
 

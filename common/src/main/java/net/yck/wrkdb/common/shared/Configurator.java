@@ -1,4 +1,4 @@
-package net.yck.wrkdb.shared;
+package net.yck.wrkdb.common.shared;
 
 import java.util.Properties;
 

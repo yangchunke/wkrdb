@@ -1,4 +1,4 @@
-package net.yck.wrkdb.util;
+package net.yck.wrkdb.common.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

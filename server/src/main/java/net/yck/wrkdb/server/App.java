@@ -13,8 +13,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import net.yck.wrkdb.common.shared.AppBase;
 import net.yck.wrkdb.service.thrift.DbService;
-import net.yck.wrkdb.shared.AppBase;
 
 public class App extends AppBase {
 

@@ -1,4 +1,4 @@
-package net.yck.wrkdb.util;
+package net.yck.wrkdb.common.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

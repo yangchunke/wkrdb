@@ -1,4 +1,4 @@
-package net.yck.wrkdb.shared;
+package net.yck.wrkdb.common.shared;
 
 public abstract class AppBase {
 

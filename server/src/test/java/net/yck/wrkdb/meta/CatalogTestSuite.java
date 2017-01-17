@@ -8,9 +8,9 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.yck.wrkdb.common.util.JsonUtil;
 import net.yck.wrkdb.meta.Catalog;
 import net.yck.wrkdb.meta.NamedElement;
-import net.yck.wrkdb.util.JsonUtil;
 
 public class CatalogTestSuite extends MetaTestSuiteBase {
 

@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.yck.wkrdb.DB;
+import net.yck.wrkdb.common.DBState;
 import net.yck.wrkdb.core.DBOptions;
-import net.yck.wrkdb.core.DBState;
 import net.yck.wrkdb.meta.CatalogTestSuite;
 import net.yck.wrkdb.meta.SchemaTestSuite;
 import net.yck.wrkdb.meta.TableTestSuite;

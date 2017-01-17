@@ -7,8 +7,8 @@ import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.NettyTransceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 
+import net.yck.wrkdb.common.shared.IConfigurable;
 import net.yck.wrkdb.service.avro.DbService;
-import net.yck.wrkdb.shared.IConfigurable;
 
 public class AvroDbClient implements IConfigurable, DbService, AutoCloseable {
 

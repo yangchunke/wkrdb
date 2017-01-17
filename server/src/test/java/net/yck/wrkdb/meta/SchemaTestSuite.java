@@ -10,14 +10,14 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.yck.wrkdb.common.util.AvroUtil;
+import net.yck.wrkdb.common.util.JsonUtil;
 import net.yck.wrkdb.meta.Group;
 import net.yck.wrkdb.meta.Key;
 import net.yck.wrkdb.meta.NamedElement;
 import net.yck.wrkdb.meta.Schema;
 import net.yck.wrkdb.meta.Table;
 import net.yck.wrkdb.meta.UDT;
-import net.yck.wrkdb.util.AvroUtil;
-import net.yck.wrkdb.util.JsonUtil;
 
 public class SchemaTestSuite extends MetaTestSuiteBase {
 
