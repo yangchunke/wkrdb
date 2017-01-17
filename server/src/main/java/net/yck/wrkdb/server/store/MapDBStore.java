@@ -63,6 +63,8 @@ public class MapDBStore extends FileStore {
     for (Entry<String, ByteBuffer> entry : row.entrySet()) {
       if (entry.getValue() != null) {
         map(rowKey, entry.getKey()).put(rowKey, entry.getValue().array());
+      } else {
+        map(rowKey, entry.getKey()).remove(rowKey);
       }
     }
   }
