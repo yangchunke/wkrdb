@@ -42,8 +42,7 @@ public class MapDBStoreTestSuite extends StoreTestSuiteBase {
 
       DB db = DB.builder().setCatalog(CatalogTestSuite.sampleCatalog()).setOptions(options).build();
 
-      Store store =
-          db.getStore(SchemaTestSuite.c_SampleSchemaName, TableTestSuite.c_SampleTableName);
+      Store store = db.getStore(SchemaTestSuite.c_SampleSchemaName, TableTestSuite.c_SampleTableName);
 
       org.apache.avro.Schema rowKeyAvroSchema = store.getRowKeyAvroSchema();
       LOG.info(rowKeyAvroSchema);
@@ -65,8 +64,8 @@ public class MapDBStoreTestSuite extends StoreTestSuiteBase {
 
   private static class TestRunner implements Runnable {
 
-    final Store store;
-    final org.apache.avro.Schema rowKeyAvroSchema;
+    final Store                               store;
+    final org.apache.avro.Schema              rowKeyAvroSchema;
     final Map<String, org.apache.avro.Schema> groupAvroSchemaMap;
 
     TestRunner(Store store) {
@@ -85,8 +84,8 @@ public class MapDBStoreTestSuite extends StoreTestSuiteBase {
     }
 
     private void _run() throws DBException {
-      final List<String> columns = Arrays.asList(TableTestSuite.c_SampleGroupName_Val,
-          TableTestSuite.c_SampleGroupName_Addr);
+      final List<String> columns =
+          Arrays.asList(TableTestSuite.c_SampleGroupName_Val, TableTestSuite.c_SampleGroupName_Addr);
       for (int i = 0; i < c_Iteration * c_Iteration; i++) {
         GenericRecord rkRec = new GenericData.Record(rowKeyAvroSchema);
         rkRec.put("id", rand.nextLong());
@@ -98,8 +97,7 @@ public class MapDBStoreTestSuite extends StoreTestSuiteBase {
         if (rand.nextBoolean()) {
           UDT udt = CatalogTestSuite.sampleCatalog().getSchema(SchemaTestSuite.c_SampleSchemaName)
               .getUDT(UDTTestSuite.c_SampleUDTName);
-          GenericRecord fld =
-              new GenericData.Record(udt.getScopedAvroSchema(store.getSchemaAvroSchema()));
+          GenericRecord fld = new GenericData.Record(udt.getScopedAvroSchema(store.getSchemaAvroSchema()));
           fld.put("left", UUID.randomUUID().toString());
           fld.put("right", System.currentTimeMillis());
           val_expected.put("value", fld);
@@ -124,7 +122,13 @@ public class MapDBStoreTestSuite extends StoreTestSuiteBase {
           Assert.assertEquals(addr_expected, actuals.get(1));
         }
 
-        store.remove(PutOptions.c_default, rkRec, columns);
+        store.remove(PutOptions.c_default, rkRec, Arrays.asList(TableTestSuite.c_SampleGroupName_Val));
+        store.put(PutOptions.c_default, rkRec, new HashMap<String, GenericRecord>() {
+          private static final long serialVersionUID = -4336061165607218119L;
+          {
+            put(TableTestSuite.c_SampleGroupName_Addr, null/*null value indicates removal*/);
+          }
+        });
 
         {
           List<GenericRecord> actual = store.get(GetOptions.c_default, rkRec, columns);

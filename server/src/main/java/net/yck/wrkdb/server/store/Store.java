@@ -153,12 +153,14 @@ public abstract class Store {
       byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
       Map<String, ByteBuffer> raw = new HashMap<>();
       for (Map.Entry<String, GenericRecord> entry : record.entrySet()) {
+        ByteBuffer buffer = null;
         if (entry.getValue() != null) {
           org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(entry.getKey());
           if (groupAvroSchema != null) {
-            raw.put(entry.getKey(), ByteBufferUtil.fromByteArray(AvroUtil.toBytes(entry.getValue(), groupAvroSchema)));
+            buffer = ByteBufferUtil.fromByteArray(AvroUtil.toBytes(entry.getValue(), groupAvroSchema));
           }
         }
+        raw.put(entry.getKey(), buffer);
       }
       put(options, rowKeyBytes, raw);
     } catch (IOException e) {
