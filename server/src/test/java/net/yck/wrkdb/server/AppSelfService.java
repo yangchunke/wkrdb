@@ -37,7 +37,7 @@ public abstract class AppSelfService implements ITestSuite {
   }
 
   protected static net.yck.wrkdb.service.thrift.DbService.Iface getThriftIface() {
-    return app.getThriftIface();
+    return app.getThriftDbService();
   }
 
   protected static net.yck.wrkdb.service.avro.DbService getAvroDbService() {

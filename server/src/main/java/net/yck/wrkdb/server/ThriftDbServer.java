@@ -43,7 +43,7 @@ public class ThriftDbServer extends DbServerBase {
   public void run() {
     try {
       TServerSocket serverTransport = new TServerSocket(this.getPort());
-      Processor<ThriftDbService> processor = new Processor<ThriftDbService>(getThriftIface());
+      Processor<ThriftDbService> processor = new Processor<ThriftDbService>(getDbService());
 
       Args args = new Args(serverTransport)
           .maxWorkerThreads(app.config.getProperty(THRIFT_MAX_WORKER_THREADS, DEF_MAX_WORKER_THREADS))
@@ -67,7 +67,7 @@ public class ThriftDbServer extends DbServerBase {
     }
   }
 
-  ThriftDbService getThriftIface() {
+  ThriftDbService getDbService() {
     if (service == null) {
       service = new ThriftDbService(this, LOG);
     }

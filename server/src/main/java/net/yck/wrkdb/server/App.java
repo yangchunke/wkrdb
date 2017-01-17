@@ -90,8 +90,8 @@ public class App extends AppBase {
     dbManager.shutdown();
   }
 
-  DbService.Iface getThriftIface() {
-    return thriftDbServer.getThriftIface();
+  DbService.Iface getThriftDbService() {
+    return thriftDbServer.getDbService();
   }
 
   net.yck.wrkdb.service.avro.DbService getAvroDbService() {
