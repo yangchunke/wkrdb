@@ -6,9 +6,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import net.yck.wrkdb.meta.CatalogTestSuite;
-import net.yck.wrkdb.meta.SchemaTestSuite;
-import net.yck.wrkdb.meta.TableTestSuite;
+import net.yck.wrkdb.server.meta.CatalogTestSuite;
+import net.yck.wrkdb.server.meta.SchemaTestSuite;
+import net.yck.wrkdb.server.meta.TableTestSuite;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
 

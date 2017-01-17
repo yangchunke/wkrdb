@@ -17,16 +17,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import avro.shaded.com.google.common.base.Joiner;
-import net.yck.wkrdb.DB;
+import net.yck.wkrdb.server.db.DB;
+import net.yck.wkrdb.server.db.DBOptions;
 import net.yck.wrkdb.common.DBException;
-import net.yck.wrkdb.core.DBOptions;
-import net.yck.wrkdb.meta.Catalog;
-import net.yck.wrkdb.meta.Schema;
+import net.yck.wrkdb.server.meta.Catalog;
+import net.yck.wrkdb.server.meta.Schema;
+import net.yck.wrkdb.server.store.GetOptions;
+import net.yck.wrkdb.server.store.PutOptions;
+import net.yck.wrkdb.server.store.Store;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
-import net.yck.wrkdb.store.GetOptions;
-import net.yck.wrkdb.store.PutOptions;
-import net.yck.wrkdb.store.Store;
 
 class DBManager extends ServerComponent implements AutoCloseable {
 
