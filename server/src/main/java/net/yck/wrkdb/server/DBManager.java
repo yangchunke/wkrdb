@@ -28,7 +28,7 @@ import net.yck.wrkdb.server.store.Store;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
 
-class DBManager extends ServerComponent implements AutoCloseable {
+class DBManager extends ServerComponent {
 
   final static Logger         LOG           = LogManager.getLogger(DBManager.class);
 
@@ -63,13 +63,21 @@ class DBManager extends ServerComponent implements AutoCloseable {
   }
 
   @Override
-  public void close() throws Exception {
+  protected void doShutdown(){
     if (sysDB != null) {
-      sysDB.close();
+      try {
+        sysDB.close();
+      } catch (Exception e) {
+        LOG.error(e);
+      }
       sysDB = null;
     }
     for (DB db : appDBs.values()) {
-      db.close();
+      try {
+        db.close();
+      } catch (Exception e) {
+        LOG.error(e);
+      }
     }
     appDBs.clear();
   }

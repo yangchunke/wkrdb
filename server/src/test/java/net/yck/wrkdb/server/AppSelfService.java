@@ -21,9 +21,9 @@ public abstract class AppSelfService implements ITestSuite {
           app.initialize();
 
           // // Start avro db server in a separate thread
-          // new Thread(app.avroDbServer, "avroDbServer").start();
+          new Thread(app.avroDbServer, "avroDbServer").start();
           // // Start thrift server in a separate thread
-          // new Thread(app.thriftDbServer, "thriftDbServer").start();
+          new Thread(app.thriftDbServer, "thriftDbServer").start();
           //
           // try {
           // // wait for the server start up

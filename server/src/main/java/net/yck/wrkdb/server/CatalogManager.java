@@ -1,13 +1,13 @@
 package net.yck.wrkdb.server;
 
-public class CatalogManager extends ServerComponent implements AutoCloseable {
+public class CatalogManager extends ServerComponent {
 
   CatalogManager(App app) {
     super(app);
   }
 
   @Override
-  public void close() throws Exception {
+  protected void doShutdown() {
     // TODO Auto-generated method stub
 
   }

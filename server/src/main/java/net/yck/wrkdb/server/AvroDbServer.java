@@ -18,6 +18,7 @@ public class AvroDbServer extends DbServerBase {
   private final static ImmutablePair<String, Integer> PROP_DEF_PAIR =
       new ImmutablePair<String, Integer>(AVRO_DBSERVER_PORT, 10720);
 
+  private Server                                      server;
   private DbService                                   svc;
 
   AvroDbServer(App app) {
@@ -26,8 +27,6 @@ public class AvroDbServer extends DbServerBase {
 
   @Override
   public void run() {
-
-    Server server = null;
     try {
       server = new NettyServer(new SpecificResponder(DbService.class, getDbService()),
           new InetSocketAddress("localhost", getPort()));
@@ -36,9 +35,15 @@ public class AvroDbServer extends DbServerBase {
     } catch (Exception e) {
       logger.error(() -> "Failed to start Avro DbService", e);
     } finally {
-      if (server != null) {
-        server.close();
-      }
+      this.shutdown();
+    }
+  }
+
+  @Override
+  protected void doShutdown() {
+    if (server != null) {
+      server.close();
+      server = null;
     }
   }
 

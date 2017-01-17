@@ -39,14 +39,13 @@ public class App extends AppBase {
     super(args);
   }
 
-  @SuppressWarnings("resource")
   void initialize() throws Exception {
-    dbManager = (DBManager) new DBManager(this).initialize();
+    dbManager = new DBManager(this).initialize();
 
     // these three should be the last to be initialized
-    thriftDbServer = (ThriftDbServer) new ThriftDbServer(this).initialize();
-    avroDbServer = (AvroDbServer) new AvroDbServer(this).initialize();
-    shutdownHook = (ShutdownHook) new ShutdownHook(this).initialize();
+    thriftDbServer = new ThriftDbServer(this).initialize();
+    avroDbServer = new AvroDbServer(this).initialize();
+    shutdownHook = new ShutdownHook(this).initialize();
   }
 
   void start() {
@@ -82,6 +81,13 @@ public class App extends AppBase {
     } finally {
       pool.shutdown();
     }
+  }
+
+  void shutdown() {
+    thriftDbServer.shutdown();
+    avroDbServer.shutdown();
+
+    dbManager.shutdown();
   }
 
   DbService.Iface getThriftIface() {
