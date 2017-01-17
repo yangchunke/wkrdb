@@ -23,8 +23,8 @@ public final class ExecutorUtil {
    * @param logger logger, can be null.
    * @return true if the thread pool was shut down in time
    */
-  public final static boolean shutdown(final ExecutorService pool, final long timeout,
-      final TimeUnit timeUnit, final Logger logger) {
+  public final static boolean shutdown(final ExecutorService pool, final long timeout, final TimeUnit timeUnit,
+      final Logger logger) {
 
     boolean ret = true;
 
@@ -41,8 +41,7 @@ public final class ExecutorUtil {
         // Wait a while for tasks to respond to being cancelled
         if (!pool.awaitTermination(timeout, timeUnit)) {
           if (logger != null) {
-            logger
-                .error("Thread pool did not terminate in time (" + timeout + " " + timeUnit + ")");
+            logger.error("Thread pool did not terminate in time (" + timeout + " " + timeUnit + ")");
           }
 
           ret = false;
@@ -68,16 +67,14 @@ public final class ExecutorUtil {
    * @see ExecutorService#newWorkStealingPool()
    */
   public final static ExecutorService newWorkStealingPool(final String poolName) {
-    return new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
-        new ForkJoinWorkerThreadFactory() {
-          @Override
-          public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-            final ForkJoinWorkerThread worker =
-                ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            worker.setName(poolName + "-" + worker.getPoolIndex());
-            return worker;
-          }
-        }, null, true);
+    return new ForkJoinPool(Runtime.getRuntime().availableProcessors(), new ForkJoinWorkerThreadFactory() {
+      @Override
+      public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+        final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+        worker.setName(poolName + "-" + worker.getPoolIndex());
+        return worker;
+      }
+    }, null, true);
   }
 
   /**
@@ -89,7 +86,6 @@ public final class ExecutorUtil {
    * @see Executors#newFixedThreadPool(int, ThreadFactory)
    */
   public final static ExecutorService newFixedThreadPool(int nThreads, final String poolName) {
-    return Executors.newFixedThreadPool(nThreads,
-        new ThreadFactoryBuilder().setNameFormat(poolName + "-%d").build());
+    return Executors.newFixedThreadPool(nThreads, new ThreadFactoryBuilder().setNameFormat(poolName + "-%d").build());
   }
 }

@@ -10,14 +10,14 @@ import org.apache.commons.lang.StringUtils;
 
 public final class ResourceUtil {
 
-    public final static InputStream getInputStream(Class<?> clz, String file) throws IOException {
-        if (!StringUtils.startsWith(file, File.separator)) {
-            file = File.separator + file;
-        }
-        return FileIO.uncompressed(clz.getResourceAsStream(file), file);
+  public final static InputStream getInputStream(Class<?> clz, String file) throws IOException {
+    if (!StringUtils.startsWith(file, File.separator)) {
+      file = File.separator + file;
     }
+    return FileIO.uncompressed(clz.getResourceAsStream(file), file);
+  }
 
-    public final static BufferedReader getBufferedReader(Class<?> clz, String file) throws IOException {
-        return new BufferedReader(new InputStreamReader(getInputStream(clz, file)));
-    }
+  public final static BufferedReader getBufferedReader(Class<?> clz, String file) throws IOException {
+    return new BufferedReader(new InputStreamReader(getInputStream(clz, file)));
+  }
 }

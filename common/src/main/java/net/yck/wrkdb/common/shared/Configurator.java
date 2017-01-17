@@ -16,97 +16,97 @@ import org.apache.logging.log4j.Logger;
 
 public class Configurator {
 
-    private final static Logger LOG = LogManager.getLogger(Configurator.class);
+  private final static Logger LOG               = LogManager.getLogger(Configurator.class);
 
-    public static Option OPT_CONFIGURATION = Option.builder("c").longOpt("configuration").argName("configuration file").hasArg().build();
+  public static Option        OPT_CONFIGURATION =
+      Option.builder("c").longOpt("configuration").argName("configuration file").hasArg().build();
 
-    public static Option OPT_PROPERTY = Option.builder("D").longOpt("property").argName("property=value").hasArgs().valueSeparator('=').build();
+  public static Option        OPT_PROPERTY      =
+      Option.builder("D").longOpt("property").argName("property=value").hasArgs().valueSeparator('=').build();
 
-    private final Options options;
-    private CommandLine line;
-    private Properties properties;
-    private Configuration configuration;
+  private final Options       options;
+  private CommandLine         line;
+  private Properties          properties;
+  private Configuration       configuration;
 
-    public Configurator(Options options) {
-        this.options = options;
+  public Configurator(Options options) {
+    this.options = options;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T getProperty(String key, T def) {
+    if (properties != null && properties.containsKey(key)) {
+      return (T) PropertyConverter.to(def.getClass(), properties.get(key));
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getProperty(String key, T def) {
-        if (properties != null && properties.containsKey(key)) {
-            return (T) PropertyConverter.to(def.getClass(), properties.get(key));
-        }
-
-        if (line.hasOption(key)) {
-            return (T) PropertyConverter.to(def.getClass(), line.getOptionValue(key));
-        }
-
-        if (configuration != null && configuration.containsKey(key)) {
-            return (T) configuration.get(def.getClass(), key);
-        }
-
-        return def;
+    if (line.hasOption(key)) {
+      return (T) PropertyConverter.to(def.getClass(), line.getOptionValue(key));
     }
 
-    private Configurator parseArgs(String[] args) {
-
-        // create the parser
-        CommandLineParser parser = new DefaultParser();
-        try {
-            // parse the command line arguments
-            line = parser.parse(options, args);
-
-            if (line.hasOption(OPT_PROPERTY.getOpt())) {
-                properties = line.getOptionProperties(OPT_PROPERTY.getOpt());
-            }
-
-            if (line.hasOption(OPT_CONFIGURATION.getOpt())) {
-                Configurations configs = new Configurations();
-                configuration = configs.properties(line.getOptionValue(OPT_CONFIGURATION.getOpt()));
-            }
-        }
-        catch (ParseException exp) {
-            LOG.error(() -> "Parsing failed.", exp);
-        }
-        catch (ConfigurationException e) {
-            LOG.error(() -> "Loading configuration file failed.", e);
-        }
-
-        return this;
+    if (configuration != null && configuration.containsKey(key)) {
+      return (T) configuration.get(def.getClass(), key);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    return def;
+  }
+
+  private Configurator parseArgs(String[] args) {
+
+    // create the parser
+    CommandLineParser parser = new DefaultParser();
+    try {
+      // parse the command line arguments
+      line = parser.parse(options, args);
+
+      if (line.hasOption(OPT_PROPERTY.getOpt())) {
+        properties = line.getOptionProperties(OPT_PROPERTY.getOpt());
+      }
+
+      if (line.hasOption(OPT_CONFIGURATION.getOpt())) {
+        Configurations configs = new Configurations();
+        configuration = configs.properties(line.getOptionValue(OPT_CONFIGURATION.getOpt()));
+      }
+    } catch (ParseException exp) {
+      LOG.error(() -> "Parsing failed.", exp);
+    } catch (ConfigurationException e) {
+      LOG.error(() -> "Loading configuration file failed.", e);
     }
 
-    public static class Builder {
+    return this;
+  }
 
-        private String[] args;
-        private final Options options = new Options();
+  public static Builder builder() {
+    return new Builder();
+  }
 
-        public Configurator build() {
-            return new Configurator(options).parseArgs(args);
-        }
+  public static class Builder {
 
-        public Builder args(String[] args) {
-            this.args = args;
-            return this;
-        }
+    private String[]      args;
+    private final Options options = new Options();
 
-        public Builder addSwitch(String opt, String longOpt, String desc) {
-            options.addOption(Option.builder(opt).longOpt(longOpt).desc(desc).build());
-            return this;
-        }
-
-        public <T> Builder addOption(String opt, String longOpt, String argName, String desc) {
-            options.addOption(Option.builder(opt).longOpt(longOpt).hasArg().argName(argName).desc(desc).build());
-            return this;
-        }
-
-        public Builder addOption(Option opt) {
-            options.addOption(opt);
-            return this;
-        }
+    public Configurator build() {
+      return new Configurator(options).parseArgs(args);
     }
+
+    public Builder args(String[] args) {
+      this.args = args;
+      return this;
+    }
+
+    public Builder addSwitch(String opt, String longOpt, String desc) {
+      options.addOption(Option.builder(opt).longOpt(longOpt).desc(desc).build());
+      return this;
+    }
+
+    public <T> Builder addOption(String opt, String longOpt, String argName, String desc) {
+      options.addOption(Option.builder(opt).longOpt(longOpt).hasArg().argName(argName).desc(desc).build());
+      return this;
+    }
+
+    public Builder addOption(Option opt) {
+      options.addOption(opt);
+      return this;
+    }
+  }
 
 }
