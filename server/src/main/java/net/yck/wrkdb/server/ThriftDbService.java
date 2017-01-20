@@ -11,7 +11,7 @@ import org.apache.thrift.TException;
 
 import com.google.common.base.Preconditions;
 
-import net.yck.wrkdb.common.DBException;
+import net.yck.wkrdb.common.DBException;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
 import net.yck.wrkdb.service.thrift.DbService;

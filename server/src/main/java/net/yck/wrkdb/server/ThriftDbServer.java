@@ -11,7 +11,7 @@ import org.apache.thrift.server.TThreadPoolServer.Args;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 
-import net.yck.wrkdb.common.util.SysPropertyUtil;
+import net.yck.wkrdb.common.util.SysPropertyUtil;
 import net.yck.wrkdb.service.thrift.DbService.Processor;
 
 public class ThriftDbServer extends DbServerBase {

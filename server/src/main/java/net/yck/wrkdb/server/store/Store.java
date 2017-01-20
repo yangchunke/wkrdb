@@ -14,19 +14,20 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
+import net.yck.wkrdb.common.DBException;
+import net.yck.wkrdb.common.util.AvroUtil;
+import net.yck.wkrdb.common.util.ByteBufferUtil;
 import net.yck.wkrdb.server.db.DBBuilder;
 import net.yck.wkrdb.server.db.DBOptions;
 import net.yck.wkrdb.server.db.DBState;
-import net.yck.wrkdb.common.DBException;
-import net.yck.wrkdb.common.util.AvroUtil;
-import net.yck.wrkdb.common.util.ByteBufferUtil;
 import net.yck.wrkdb.server.meta.Group;
 import net.yck.wrkdb.server.meta.Meta;
 import net.yck.wrkdb.server.meta.Table;
 
 public abstract class Store {
 
-  final protected static Logger LOG = LoggerFactory.getLogger(Store.class);
+  protected final static Logger  LOG                = LoggerFactory.getLogger(Store.class);
+  public final static ByteBuffer c_RemovalIndicator = ByteBuffer.wrap(new byte[0]);
 
   public static enum Type {
     MapDB
@@ -153,14 +154,12 @@ public abstract class Store {
       byte[] rowKeyBytes = AvroUtil.toBytes(rowKey, rowkeyAvroSchema);
       Map<String, ByteBuffer> raw = new HashMap<>();
       for (Map.Entry<String, GenericRecord> entry : record.entrySet()) {
-        ByteBuffer buffer = null;
         if (entry.getValue() != null) {
           org.apache.avro.Schema groupAvroSchema = groupAvroSchemaMap.get(entry.getKey());
           if (groupAvroSchema != null) {
-            buffer = ByteBufferUtil.fromByteArray(AvroUtil.toBytes(entry.getValue(), groupAvroSchema));
+            raw.put(entry.getKey(), ByteBufferUtil.fromByteArray(AvroUtil.toBytes(entry.getValue(), groupAvroSchema)));
           }
         }
-        raw.put(entry.getKey(), buffer);
       }
       put(options, rowKeyBytes, raw);
     } catch (IOException e) {
@@ -230,7 +229,7 @@ public abstract class Store {
       }
 
       if (ret != null && options.getUseCache()) {
-        ret = new CacheStore(table, ret).setOptions(options).setState(DBState.Closed);
+        ret = new CacheStore(table).setBackend(ret).setOptions(options).setState(DBState.Closed);
       }
 
       return ret;

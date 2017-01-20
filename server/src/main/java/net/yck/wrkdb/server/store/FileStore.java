@@ -6,7 +6,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import net.yck.wrkdb.common.DBException;
+import net.yck.wkrdb.common.DBException;
 import net.yck.wrkdb.server.meta.Table;
 
 abstract class FileStore extends Store {

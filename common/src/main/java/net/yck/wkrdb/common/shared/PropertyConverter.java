@@ -1,4 +1,4 @@
-package net.yck.wrkdb.common.shared;
+package net.yck.wkrdb.common.shared;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

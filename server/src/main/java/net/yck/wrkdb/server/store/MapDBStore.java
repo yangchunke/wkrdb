@@ -12,9 +12,9 @@ import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
 import org.mapdb.serializer.SerializerCompressionWrapper;
 
+import net.yck.wkrdb.common.DBException;
+import net.yck.wkrdb.common.util.ByteBufferUtil;
 import net.yck.wkrdb.server.db.DBOptions;
-import net.yck.wrkdb.common.DBException;
-import net.yck.wrkdb.common.util.ByteBufferUtil;
 import net.yck.wrkdb.server.meta.Table;
 import net.yck.wrkdb.server.util.Sharder;
 
@@ -61,10 +61,10 @@ public class MapDBStore extends FileStore {
   @Override
   public void put(PutOptions options, byte[] rowKey, Map<String, ByteBuffer> row) throws DBException {
     for (Entry<String, ByteBuffer> entry : row.entrySet()) {
-      if (entry.getValue() != null) {
-        map(rowKey, entry.getKey()).put(rowKey, entry.getValue().array());
-      } else {
+      if (entry.getValue() == c_RemovalIndicator) {
         map(rowKey, entry.getKey()).remove(rowKey);
+      } else if (entry.getValue() != null) {
+        map(rowKey, entry.getKey()).put(rowKey, entry.getValue().array());
       }
     }
   }

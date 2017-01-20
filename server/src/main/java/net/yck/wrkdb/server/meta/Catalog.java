@@ -9,7 +9,7 @@ import java.util.List;
 import com.google.common.base.Joiner;
 
 import avro.shaded.com.google.common.base.Objects;
-import net.yck.wrkdb.common.util.ResourceUtil;
+import net.yck.wkrdb.common.util.ResourceUtil;
 
 public class Catalog extends VersionedElement {
   private Collection<Schema> schemas;

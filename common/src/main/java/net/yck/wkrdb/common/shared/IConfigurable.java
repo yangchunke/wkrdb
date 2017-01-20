@@ -1,4 +1,4 @@
-package net.yck.wrkdb.common.shared;
+package net.yck.wkrdb.common.shared;
 
 public interface IConfigurable {
   final static String THRIFT_DBSERVER_ENABLED   = "thrift.dbserver.enabled";

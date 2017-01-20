@@ -1,6 +1,6 @@
 package net.yck.wrkdb.server.meta;
 
-import net.yck.wrkdb.common.DBException;
+import net.yck.wkrdb.common.DBException;
 
 abstract class Key extends Group {
 

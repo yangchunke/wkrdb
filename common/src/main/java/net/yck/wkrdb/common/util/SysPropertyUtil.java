@@ -1,4 +1,4 @@
-package net.yck.wrkdb.common.util;
+package net.yck.wkrdb.common.util;
 
 public final class SysPropertyUtil {
   public static String getStringProperty(String name, String def) {

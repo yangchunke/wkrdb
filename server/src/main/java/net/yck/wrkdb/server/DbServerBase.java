@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Preconditions;
 
-import net.yck.wrkdb.common.util.ResourceUtil;
+import net.yck.wkrdb.common.util.ResourceUtil;
 
 public abstract class DbServerBase extends ServerComponent implements Runnable {
 

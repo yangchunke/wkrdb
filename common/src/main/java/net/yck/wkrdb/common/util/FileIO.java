@@ -1,4 +1,4 @@
-package net.yck.wrkdb.common.util;
+package net.yck.wkrdb.common.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

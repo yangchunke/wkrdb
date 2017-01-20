@@ -10,8 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import net.yck.wrkdb.common.util.AvroUtil;
-import net.yck.wrkdb.common.util.JsonUtil;
+import net.yck.wkrdb.common.util.AvroUtil;
+import net.yck.wkrdb.common.util.JsonUtil;
 import net.yck.wrkdb.server.meta.Group;
 import net.yck.wrkdb.server.meta.Key;
 import net.yck.wrkdb.server.meta.NamedElement;

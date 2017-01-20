@@ -17,9 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import avro.shaded.com.google.common.base.Joiner;
+import net.yck.wkrdb.common.DBException;
 import net.yck.wkrdb.server.db.DB;
 import net.yck.wkrdb.server.db.DBOptions;
-import net.yck.wrkdb.common.DBException;
 import net.yck.wrkdb.server.meta.Catalog;
 import net.yck.wrkdb.server.meta.Schema;
 import net.yck.wrkdb.server.store.GetOptions;

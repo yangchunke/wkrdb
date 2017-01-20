@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.yck.wrkdb.common.util.ExecutorUtil;
+import net.yck.wkrdb.common.util.ExecutorUtil;
 
 public interface ITestSuite {
 

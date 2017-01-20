@@ -1,4 +1,4 @@
-package net.yck.wrkdb.common.shared;
+package net.yck.wkrdb.common.shared;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,9 +14,9 @@ import org.apache.thrift.TException;
 
 import com.google.common.base.Preconditions;
 
-import net.yck.wrkdb.common.DBException;
-import net.yck.wrkdb.common.util.AvroUtil;
-import net.yck.wrkdb.common.util.ByteBufferUtil;
+import net.yck.wkrdb.common.DBException;
+import net.yck.wkrdb.common.util.AvroUtil;
+import net.yck.wkrdb.common.util.ByteBufferUtil;
 import net.yck.wrkdb.service.thrift.DBContext;
 import net.yck.wrkdb.service.thrift.DBSchema;
 import net.yck.wrkdb.service.thrift.DbService;
